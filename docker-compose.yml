@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  api:
+    container_name: wineml_registry_api
+    build:
+      context: ./wineml_registry/api
+      dockerfile: ./docker/Dockerfile.azure
+    image: wineml_registry_api_image
+    ports:
+      - 8081:8081
+    environment:
+      # AZURE EXAMPLE
+      - AZURE_ACCOUNT_NAME="YOUR_ACCOUNT_NAME"
+      - AZURE_CONTAINER_NAME="YOUR_CONTAINER_NAME"
+      - AZURE_STORAGE_CONNECTION_STRING="YOUR_CONNECTION_STRING"
