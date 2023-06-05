@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  api:
+    container_name: wineml_registry_api
+    build:
+      context: ./api
+      dockerfile: ./docker/Dockerfile.azure
+    image: wineml_registry_api_image
+    ports:
+      - 8081:8081
+    environment:
+      - AZURE_ACCOUNT_NAME="winemlblob"
+      - AZURE_CONTAINER_NAME="wineml-registry-container"
+      - AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;AccountName=winemlblob;AccountKey=IkjOpyFKY08zC6EgLqXif1+5uVo3ecNklQlf+T9Fb6RuKq/LKORknut7vw/yHWwAMX2tInlYK2a6+AStBADAOQ==;EndpointSuffix=core.windows.net"
