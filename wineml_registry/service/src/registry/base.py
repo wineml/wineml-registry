@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class BaseRegistryController(ABC):
     @abstractmethod
     def _download(self):

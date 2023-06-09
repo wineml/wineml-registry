@@ -1,16 +1,17 @@
 from abc import ABC
-from typing import List
-from sqlalchemy import MetaData, func
-from sqlmodel import create_engine, Session, select, delete
-from db.schema import SQLModel, Model, ModelTag
 from datetime import datetime
+from typing import List
+
+from db.schema import Model, ModelTag, SQLModel
+from sqlalchemy import MetaData, func
+from sqlmodel import Session, create_engine, delete, select
+
 
 class BaseModelConnector(ABC):
-
     def __init__(
         self,
         engine_connector_string: str,
-        connect_args: dict={},
+        connect_args: dict = {},
     ):
         self.engine = create_engine(
             engine_connector_string,
@@ -30,7 +31,6 @@ class BaseModelConnector(ABC):
 
     def create_all_tables(self):
         SQLModel.metadata.create_all(self.engine)
-
 
     ######################################
     # model table operations
@@ -138,12 +138,13 @@ class BaseModelConnector(ABC):
             all_tags = [ModelTag(name=tag, model_id=model_id) for tag in tags]
             session.add_all(all_tags)
             session.commit()
-    
+
     def remove_tags(self, model_id: str, tags: List[str]):
         with Session(self.engine) as session:
-            session.exec(delete(ModelTag).where(
-                ModelTag.name.in_(tags),
-                ModelTag.model_id == model_id,
+            session.exec(
+                delete(ModelTag).where(
+                    ModelTag.name.in_(tags),
+                    ModelTag.model_id == model_id,
                 )
             )
             session.commit()

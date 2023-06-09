@@ -1,8 +1,7 @@
 from fastapi import APIRouter, BackgroundTasks, UploadFile
 from fastapi.responses import FileResponse
 from registry import registry_connector
-from registry.utils import resolve_artifact_path, remove_file
-
+from registry.utils import remove_file, resolve_artifact_path
 
 router = APIRouter(tags=["user", "registry"], prefix="/registry")
 
@@ -56,6 +55,6 @@ async def download_model(
         model_version=model_version,
     )
     file_name = artifact_path.replace("/", "__")
-    headers = {'Content-Disposition': f'attachment; filename=\"{file_name}\"'}
+    headers = {"Content-Disposition": f'attachment; filename="{file_name}"'}
     background_tasks.add_task(remove_file, temp_file_path)
     return FileResponse(temp_file_path, headers=headers)

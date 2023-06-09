@@ -1,7 +1,7 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends
-from db import db_connector
 
+from db import db_connector
+from fastapi import APIRouter, Depends
 
 router = APIRouter(tags=["user", "db"], prefix="/db")
 
@@ -59,7 +59,9 @@ async def get_model(model_id: Annotated[str, Depends(get_model_id)]):
 
 # update status of model
 @router.put("/model/status")
-async def update_model_status(model_id: Annotated[str, Depends(get_model_id)], model_status: str):
+async def update_model_status(
+    model_id: Annotated[str, Depends(get_model_id)], model_status: str
+):
     db_connector.update_model_status(model_id=model_id, model_status=model_status)
     return "OK", 200
 

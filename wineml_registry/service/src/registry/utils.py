@@ -13,7 +13,7 @@ def resolve_model_version(model_version: str):
 def resolve_artifact_path(
     namespace: str,
     model_name: str,
-    model_version: str=None,
+    model_version: str = None,
 ):
     if model_version:
         return os.path.join(
@@ -26,6 +26,7 @@ def resolve_artifact_path(
             namespace,
             model_name,
         )
+
 
 def unresolved_artifact_path(artifact_path: str):
     return artifact_path.split("/")

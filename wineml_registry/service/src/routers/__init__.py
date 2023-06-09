@@ -1,6 +1,6 @@
 from .public.generic import router as public_generic
-from .user.registry import router as user_registry
 from .user.db import router as user_db
+from .user.registry import router as user_registry
 
 all_routers = [
     # admin routers

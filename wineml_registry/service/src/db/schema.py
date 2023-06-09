@@ -1,7 +1,8 @@
 import uuid
-from sqlmodel import SQLModel, Field
-from pydantic import UUID1
 from datetime import datetime
+
+from pydantic import UUID1
+from sqlmodel import Field, SQLModel
 
 
 class Model(SQLModel, table=True):
