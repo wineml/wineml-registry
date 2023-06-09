@@ -37,7 +37,7 @@ def initiate_registry():
     #         credentials=os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'),
     #         bucket_name=os.environ.get('BUCKET_NAME'))
     if registry_connector == "azure":
-        from registry.connectors.azure import AzureRegistryController
+        from registry.azure import AzureRegistryController
 
         return AzureRegistryController(
             connection_string=os.environ.get("AZURE_STORAGE_CONNECTION_STRING"),
@@ -47,4 +47,4 @@ def initiate_registry():
         raise Exception("No registry type found")
 
 
-registry_client = initiate_registry()
+registry_connector = initiate_registry()
