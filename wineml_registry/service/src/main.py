@@ -1,12 +1,11 @@
+from config import Config
+from constants import VERSION
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from .config import Config
-from .constants import VERSION
-from .routers import all_routers
+from routers import all_routers
 
 app = FastAPI(
-    title="WineML Registry Rest API",
+    title="WineML Registry Service",
     version=VERSION,
     docs_url=Config.SWAGGER_DOC_ROUTE,
 )

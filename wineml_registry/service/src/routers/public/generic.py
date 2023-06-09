@@ -1,6 +1,5 @@
+from constants import VERSION
 from fastapi import APIRouter
-
-from ...constants import VERSION
 
 router = APIRouter(tags=["public"])
 
