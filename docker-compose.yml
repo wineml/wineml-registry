@@ -8,14 +8,14 @@ services:
     image: wineml_registry_service_image
     networks:
       - wineml-network
-    ports:
-      - 8081:8081
+    # ports:
+    #   - 8081:8081
     environment:
       # AZURE EXAMPLE
-      - AZURE_ACCOUNT_NAME="YOUR_ACCOUNT_NAME"
-      - AZURE_CONTAINER_NAME="YOUR_CONTAINER_NAME"
-      - AZURE_STORAGE_CONNECTION_STRING="YOUR_CONNECTION_STRING"
-  
+      - AZURE_ACCOUNT_NAME="winemlblob"
+      - AZURE_STORAGE_CONTAINER_NAME="wineml-registry-container"
+      - AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;AccountName=winemlblob;AccountKey=J0SW5+EHheh+q5ok7W4wzMvwuF+1XhBZohhpTyMcoRwNSywr/Uwl/tltY+CPt5+v30hHPchnwl/I+ASt/IP52w==;EndpointSuffix=core.windows.net"
+
   init_db:
     container_name: wineml_registry_init_db
     image: curlimages/curl
@@ -28,6 +28,20 @@ services:
     restart: on-failure
     networks:
       - wineml-network
+
+  wineml_registry_ui:
+    container_name: wineml_registry_ui_container
+    build:
+      context: ./wineml_registry/ui
+    image: wineml_registry_ui_image
+    networks:
+      - wineml-network
+    ports:
+      - 3000:3000
+    depends_on:
+      - wineml_registry_service
+    environment:
+      - REACT_APP_WINEML_SERVICE_URL=http://wineml_registry_service:8081
 
 networks:
   wineml-network:
