@@ -12,9 +12,9 @@ services:
     #   - 8081:8081
     environment:
       # AZURE EXAMPLE
-      - AZURE_ACCOUNT_NAME="winemlblob"
-      - AZURE_STORAGE_CONTAINER_NAME="wineml-registry-container"
-      - AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;AccountName=winemlblob;AccountKey=J0SW5+EHheh+q5ok7W4wzMvwuF+1XhBZohhpTyMcoRwNSywr/Uwl/tltY+CPt5+v30hHPchnwl/I+ASt/IP52w==;EndpointSuffix=core.windows.net"
+      - AZURE_ACCOUNT_NAME="YOUR_ACCOUNT_NAME"
+      - AZURE_CONTAINER_NAME="YOUR_CONTAINER_NAME"
+      - AZURE_STORAGE_CONNECTION_STRING="YOUR_CONNECTION_STRING"
 
   init_db:
     container_name: wineml_registry_init_db
