@@ -1,7 +1,7 @@
 from constants import VERSION
 from fastapi import APIRouter
 
-router = APIRouter(tags=["public"])
+router = APIRouter()
 
 ####################################################################################################
 # Generic APIs

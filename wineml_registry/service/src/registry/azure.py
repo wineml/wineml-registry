@@ -21,12 +21,7 @@ class AzureRegistryController(BaseRegistryController):
             )
         return self._client
 
-    def _download(self, model_name: str, model_version: str, namespace: str):
-        artifact_path = resolve_artifact_path(
-            namespace=namespace,
-            model_name=model_name,
-            model_version=model_version,
-        )
+    def _download(self, artifact_path: str):
         blob_client = self.client.get_blob_client(artifact_path)
         destination_path = str(uuid.uuid4())
         try:
@@ -39,31 +34,10 @@ class AzureRegistryController(BaseRegistryController):
     def _upload(
         self,
         data: str,
-        model_name: str,
-        model_version: str,
-        namespace: str,
-        model_status: str,
+        artifact_path: str,
     ):
-        artifact_path = resolve_artifact_path(
-            namespace=namespace,
-            model_name=model_name,
-            model_version=model_version,
-        )
-        metadata = {"model_status": model_status}
         blob_client = self.client.get_blob_client(artifact_path)
         try:
-            blob_client.upload_blob(data, metadata=metadata)
+            blob_client.upload_blob(data)
         except exceptions.ResourceExistsError:
             raise ModelAlreadyExists("Model already exists")
-
-    def _delete(self, model_name: str, model_version: str, namespace: str):
-        artifact_path = resolve_artifact_path(
-            namespace=namespace,
-            model_name=model_name,
-            model_version=model_version,
-        )
-        blob_client = self.client.get_blob_client(artifact_path)
-        try:
-            blob_client.delete_blob()
-        except exceptions.ResourceNotFoundError:
-            raise ModelNotFound("Model does not exist")

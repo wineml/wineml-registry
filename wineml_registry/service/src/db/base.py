@@ -2,7 +2,7 @@ from abc import ABC
 from datetime import datetime
 from typing import List
 
-from db.schema import Model, ModelTag, SQLModel
+from db.schema import Model, SQLModel, Tag
 from sqlalchemy import MetaData, func
 from sqlmodel import Session, create_engine, delete, select
 
@@ -84,10 +84,12 @@ class BaseModelConnector(ABC):
                 return False
 
     def get_model(self, model_id: str):
-        query = select(Model).where(Model.id == model_id)
+        model_query = select(Model).where(
+            Model.id == model_id,
+        )
         with Session(self.engine) as session:
-            result = session.exec(query).first()
-        return result
+            model_result = session.exec(model_query).first()
+        return model_result
 
     def get_all_models(self) -> List[Model]:
         query = select(Model)
@@ -133,18 +135,27 @@ class BaseModelConnector(ABC):
             session.commit()
             session.refresh(model)
 
-    def add_tags(self, model_id: str, tags: List[str]):
+    def add_tag(self, model_id: str, tag: str):
         with Session(self.engine) as session:
-            all_tags = [ModelTag(name=tag, model_id=model_id) for tag in tags]
-            session.add_all(all_tags)
+            model = session.exec(select(Model).where(Model.id == model_id)).one()
+            cur_tag = session.exec(select(Tag).where(Tag.name == tag)).one()
+            cur_tag.models.append(model)
+            session.add(cur_tag)
             session.commit()
 
-    def remove_tags(self, model_id: str, tags: List[str]):
+        # only add tags that are not already in the db
+        # tags = [tag for tag in tags if tag not in cur_tags]
+        # with Session(self.engine) as session:
+        #     all_tags = [ModelTag(name=tag, model_id=model_id) for tag in tags]
+        #     session.add_all(all_tags)
+        #     session.commit()
+
+    def remove_tag(self, model_id: str, tags: str):
         with Session(self.engine) as session:
             session.exec(
-                delete(ModelTag).where(
-                    ModelTag.name.in_(tags),
-                    ModelTag.model_id == model_id,
+                delete(Tag).where(
+                    Tag.name.in_(tags),
+                    Tag.model_id == model_id,
                 )
             )
             session.commit()
