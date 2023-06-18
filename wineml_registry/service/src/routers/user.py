@@ -59,16 +59,6 @@ async def get_model_id(
 ####################################################################################################
 
 
-@router.put("/init")
-async def init_model_db():
-    """
-    Initialize the model database. To be used during initial startup
-    """
-    db_connector.create_all_tables()
-    table_names = [table.name for table in db_connector.list_all_tables()]
-    return table_names
-
-
 @router.post("/model")
 async def log_new_model(
     file: UploadFile,
@@ -78,6 +68,7 @@ async def log_new_model(
     namespace: str,
 ):
     """
+    **[DONE]**\n
     Log a new model to the database
     1. Generate uuid for the model
     2. Upload the model to the registry
@@ -104,12 +95,18 @@ async def log_new_model(
 
 @router.get("/model")
 async def get_model_info(model_id: Annotated[str, Depends(get_model_id)]):
+    """
+    **[TODO]**\n
+    """
     model = db_connector.get_model(model_id=model_id)
     return model
 
 
 @router.get("/models")
 async def list_models_info():
+    """
+    **[TODO]**\n
+    """
     models = db_connector.get_all_models()
     return models
 
@@ -121,6 +118,9 @@ async def download_model_pickle(
     model_name: str,
     model_version: str,
 ):
+    """
+    **[TODO]**\n
+    """
     artifact_path = resolve_artifact_path(
         namespace=namespace,
         model_name=model_name,
@@ -135,12 +135,18 @@ async def download_model_pickle(
 
 @router.put("/model/tag")
 async def add_tag(model_id: Annotated[str, Depends(get_model_id)], tag: str):
+    """
+    **[DONE]**\n
+    """
     db_connector.add_tag(model_id=model_id, tag=tag)
     return "OK", 200
 
 
 @router.put("/model/untag")
 async def remove_tags(model_id: Annotated[str, Depends(get_model_id)], tags: list[str]):
+    """
+    **[DONE]**\n
+    """
     db_connector.remove_tags(model_id=model_id, tags=tags)
     return "OK", 200
 
@@ -149,5 +155,8 @@ async def remove_tags(model_id: Annotated[str, Depends(get_model_id)], tags: lis
 async def update_model_status(
     model_id: Annotated[str, Depends(get_model_id)], model_status: str
 ):
+    """
+    **[DONE]**\n
+    """
     db_connector.update_model_status(model_id=model_id, model_status=model_status)
     return "OK", 200
