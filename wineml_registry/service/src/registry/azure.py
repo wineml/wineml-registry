@@ -4,7 +4,6 @@ from azure.core import exceptions
 from azure.storage.blob import ContainerClient
 from registry.base import BaseRegistryController
 from registry.exception import ModelAlreadyExists, ModelNotFound
-from registry.utils import resolve_artifact_path
 
 
 class AzureRegistryController(BaseRegistryController):
