@@ -31,6 +31,7 @@ async def log_new_model_to_db(
     model_version: str,
     model_status: str,
     artifact_path: str,
+    tags: list[str],
 ):
     db_connector.log_new_model(
         namespace=namespace,
@@ -38,6 +39,7 @@ async def log_new_model_to_db(
         model_version=model_version,
         model_status=model_status,
         artifact_path=artifact_path,
+        tags=tags,
     )
 
 
@@ -59,13 +61,23 @@ async def get_model_id(
 ####################################################################################################
 
 
+@router.get("/model")
+async def get_model_info(model_id: Annotated[str, Depends(get_model_id)]):
+    """
+    **[DONE]**\n
+    """
+    model = db_connector.get_model(model_id=model_id)
+    return model
+
+
 @router.post("/model")
 async def log_new_model(
     file: UploadFile,
-    model_status: str,
+    namespace: str,
     model_name: str,
     model_version: str,
-    namespace: str,
+    model_status: str,
+    tags: list[str],
 ):
     """
     **[DONE]**\n
@@ -75,40 +87,25 @@ async def log_new_model(
     3. Log the model to the database
     4. Set uploader as the model owner
     """
+    if len(tags) == 1:
+        tags = tags[0].split(",")
     artifact_path = resolve_artifact_path(
         namespace=namespace,
         model_name=model_name,
         model_version=model_version,
     )
-    upload_model_to_registry(
+    await upload_model_to_registry(
         file=file,
         artifact_path=artifact_path,
     )
-    log_new_model_to_db(
+    await log_new_model_to_db(
         namespace=namespace,
         model_name=model_name,
         model_version=model_version,
         model_status=model_status,
         artifact_path=artifact_path,
+        tags=tags,
     )
-
-
-@router.get("/model")
-async def get_model_info(model_id: Annotated[str, Depends(get_model_id)]):
-    """
-    **[TODO]**\n
-    """
-    model = db_connector.get_model(model_id=model_id)
-    return model
-
-
-@router.get("/models")
-async def list_models_info():
-    """
-    **[TODO]**\n
-    """
-    models = db_connector.get_all_models()
-    return models
 
 
 @router.get("/model/download")
@@ -119,7 +116,7 @@ async def download_model_pickle(
     model_version: str,
 ):
     """
-    **[TODO]**\n
+    **[DONE]**\n
     """
     artifact_path = resolve_artifact_path(
         namespace=namespace,
@@ -143,11 +140,11 @@ async def add_tag(model_id: Annotated[str, Depends(get_model_id)], tag: str):
 
 
 @router.put("/model/untag")
-async def remove_tags(model_id: Annotated[str, Depends(get_model_id)], tags: list[str]):
+async def remove_tags(model_id: Annotated[str, Depends(get_model_id)], tag: str):
     """
     **[DONE]**\n
     """
-    db_connector.remove_tags(model_id=model_id, tags=tags)
+    db_connector.remove_tag(model_id=model_id, tag=tag)
     return "OK", 200
 
 
@@ -160,3 +157,12 @@ async def update_model_status(
     """
     db_connector.update_model_status(model_id=model_id, model_status=model_status)
     return "OK", 200
+
+
+@router.get("/models")
+async def list_models_info():
+    """
+    **[TODO]**\n
+    """
+    models = db_connector.get_all_models()
+    return models

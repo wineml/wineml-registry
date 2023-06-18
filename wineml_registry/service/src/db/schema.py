@@ -1,8 +1,6 @@
-import uuid
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import UUID1
 from sqlmodel import Field, Relationship, SQLModel
 
 
@@ -20,28 +18,19 @@ class Tag(SQLModel, table=True):
 
 
 class Model(SQLModel, table=True):
-    id: UUID1 = Field(
-        default_factory=uuid.uuid1,
-        primary_key=True,
-        index=True,
-        nullable=False,
-    )
+    id: Optional[int] = Field(default=None, primary_key=True)
     namespace: str
     model_name: str
     model_version: str
     model_status: str
     created_at: datetime
     last_updated: datetime
+    artifact_path: str
     tags: List["Tag"] = Relationship(back_populates="models", link_model=TagLink)
 
 
 class User(SQLModel, table=True):
-    id: UUID1 = Field(
-        default_factory=uuid.uuid1,
-        primary_key=True,
-        index=True,
-        nullable=False,
-    )
+    id: Optional[int] = Field(default=None, primary_key=True)
     username: str
     email: str
     password: str

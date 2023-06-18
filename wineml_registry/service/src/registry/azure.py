@@ -32,11 +32,11 @@ class AzureRegistryController(BaseRegistryController):
 
     def _upload(
         self,
-        data: str,
+        contents: str,
         artifact_path: str,
     ):
         blob_client = self.client.get_blob_client(artifact_path)
         try:
-            blob_client.upload_blob(data)
+            blob_client.upload_blob(contents)
         except exceptions.ResourceExistsError:
             raise ModelAlreadyExists("Model already exists")

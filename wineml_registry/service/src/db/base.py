@@ -1,8 +1,10 @@
+import logging
 from abc import ABC
 from datetime import datetime
 from typing import List
 
-from db.schema import Model, SQLModel, Tag
+from db.schema import Model, SQLModel, Tag, TagLink
+from schemas import ModelData
 from sqlalchemy import MetaData, func
 from sqlmodel import Session, create_engine, delete, select
 
@@ -89,7 +91,18 @@ class BaseModelConnector(ABC):
         )
         with Session(self.engine) as session:
             model_result = session.exec(model_query).first()
-        return model_result
+            tags = [tag.name for tag in model_result.tags]
+            return ModelData(
+                id=model_result.id,
+                namespace=model_result.namespace,
+                model_name=model_result.model_name,
+                model_version=model_result.model_version,
+                model_status=model_result.model_status,
+                created_at=model_result.created_at,
+                last_updated=model_result.last_updated,
+                artifact_path=model_result.artifact_path,
+                tags=tags,
+            )
 
     def get_all_models(self) -> List[Model]:
         query = select(Model)
@@ -103,6 +116,8 @@ class BaseModelConnector(ABC):
         model_name: str,
         model_version: str,
         model_status: str,
+        artifact_path: str,
+        tags: list[str],
     ):
         if self.if_model_exists(
             namespace=namespace,
@@ -119,6 +134,8 @@ class BaseModelConnector(ABC):
             model_status=model_status,
             created_at=utc_timenow,
             last_updated=utc_timenow,
+            artifact_path=artifact_path,
+            tags=[Tag(name=tag) for tag in tags],
         )
         with Session(self.engine) as session:
             session.add(model)
@@ -138,26 +155,27 @@ class BaseModelConnector(ABC):
     def add_tag(self, model_id: str, tag: str):
         with Session(self.engine) as session:
             model = session.exec(select(Model).where(Model.id == model_id)).one()
-            cur_tag = session.exec(select(Tag).where(Tag.name == tag)).one()
-            cur_tag.models.append(model)
-            session.add(cur_tag)
+            db_tag = session.exec(select(Tag).where(Tag.name == tag)).first()
+            if db_tag is None:
+                logging.warning(f"Tag {tag} not found, creating new tag")
+                new_db_tag = Tag(name=tag)
+                session.add(new_db_tag)
+                session.commit()
+                session.refresh(new_db_tag)
+            db_tag = session.exec(select(Tag).where(Tag.name == tag)).one()
+            db_tag.models.append(model)
+            session.add(db_tag)
             session.commit()
 
-        # only add tags that are not already in the db
-        # tags = [tag for tag in tags if tag not in cur_tags]
-        # with Session(self.engine) as session:
-        #     all_tags = [ModelTag(name=tag, model_id=model_id) for tag in tags]
-        #     session.add_all(all_tags)
-        #     session.commit()
-
-    def remove_tag(self, model_id: str, tags: str):
+    def remove_tag(self, model_id: str, tag: str):
         with Session(self.engine) as session:
-            session.exec(
-                delete(Tag).where(
-                    Tag.name.in_(tags),
-                    Tag.model_id == model_id,
-                )
-            )
+            model = session.exec(select(Model).where(Model.id == model_id)).one()
+            db_tag = session.exec(select(Tag).where(Tag.name == tag)).first()
+            try:
+                model.tags.remove(db_tag)
+            except ValueError:
+                logging.warning(f"Tag {tag} not found for model {model_id}")
+            session.add(db_tag)
             session.commit()
 
     ######################################
