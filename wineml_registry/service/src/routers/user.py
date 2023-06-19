@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, List, Optional
 
 from db import db_connector
 from fastapi import APIRouter, BackgroundTasks, Depends, UploadFile
@@ -31,7 +31,7 @@ async def log_new_model_to_db(
     model_version: str,
     model_status: str,
     artifact_path: str,
-    tags: list[str],
+    tags: List[str],
 ):
     db_connector.log_new_model(
         namespace=namespace,
@@ -77,7 +77,7 @@ async def log_new_model(
     model_name: str,
     model_version: str,
     model_status: str,
-    tags: list[str],
+    tags: List[str] = [],
 ):
     """
     **[DONE]**\n
@@ -87,17 +87,22 @@ async def log_new_model(
     3. Log the model to the database
     4. Set uploader as the model owner
     """
-    if len(tags) == 1:
-        tags = tags[0].split(",")
+    # workaround
+    tags = tags[0].split(",")
+    if tags == [""]:
+        tags = []
+
     artifact_path = resolve_artifact_path(
         namespace=namespace,
         model_name=model_name,
         model_version=model_version,
     )
+
     await upload_model_to_registry(
         file=file,
         artifact_path=artifact_path,
     )
+
     await log_new_model_to_db(
         namespace=namespace,
         model_name=model_name,
@@ -159,10 +164,22 @@ async def update_model_status(
     return "OK", 200
 
 
-@router.get("/models")
-async def list_models_info():
+@router.post("/models")
+async def list_models_info(
+    namespace: str = None,
+    model_name: str = None,
+    model_version: str = None,
+    model_status: str = None,
+    tags: List[str] = [],
+):
     """
     **[TODO]**\n
     """
-    models = db_connector.get_all_models()
+    models = db_connector.filter_models(
+        namespace=namespace,
+        model_name=model_name,
+        model_version=model_version,
+        model_status=model_status,
+        tags=tags,
+    )
     return models

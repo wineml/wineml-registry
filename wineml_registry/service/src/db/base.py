@@ -25,12 +25,6 @@ class BaseModelConnector(ABC):
     # DB level operations
     ######################################
 
-    def list_all_tables(self):
-        metadata = MetaData(bind=self.engine)
-        metadata.reflect()
-        table_names = metadata.sorted_tables
-        return table_names
-
     def create_all_tables(self):
         SQLModel.metadata.create_all(self.engine)
 
@@ -104,11 +98,47 @@ class BaseModelConnector(ABC):
                 tags=tags,
             )
 
-    def get_all_models(self) -> List[Model]:
+    def filter_models(
+        self,
+        namespace: str = None,
+        model_name: str = None,
+        model_version: str = None,
+        model_status: str = None,
+        tags: List[str] = [],
+    ):
         query = select(Model)
+
+        if not all(
+            v in [None, []]
+            for v in [namespace, model_name, model_version, model_status, tags]
+        ):
+            if namespace:
+                query = query.where(Model.namespace == namespace)
+            if model_name:
+                query = query.where(Model.model_name == model_name)
+            if model_version:
+                query = query.where(Model.model_version == model_version)
+            if model_status:
+                query = query.where(Model.model_status == model_status)
+            if tags:
+                query = query.where(Model.tags.any(Tag.name.in_(tags)))
+
         with Session(self.engine) as session:
-            result = session.exec(query).all()
-        return result
+            results = session.exec(query).all()
+            return [
+                ModelData(
+                    id=result.id,
+                    namespace=result.namespace,
+                    model_name=result.model_name,
+                    model_version=result.model_version,
+                    model_status=result.model_status,
+                    created_at=result.created_at,
+                    last_updated=result.last_updated,
+                    artifact_path=result.artifact_path,
+                    tags=[tag.name for tag in result.tags],
+                )
+                for result in results
+            ]
 
     def log_new_model(
         self,
