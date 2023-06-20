@@ -15,4 +15,4 @@ async def get_health():
 
 @router.get("/version")
 async def get_version():
-    return VERSION, 200
+    return VERSION

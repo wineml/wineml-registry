@@ -1,12 +1,13 @@
-from typing import Annotated, List, Optional
+from typing import Annotated, List
 
 from db import db_connector
 from fastapi import APIRouter, BackgroundTasks, Depends, UploadFile
 from fastapi.responses import FileResponse
 from registry import registry_connector
 from registry.utils import remove_file, resolve_artifact_path
+from routers.model import get_model_id
 
-router = APIRouter(tags=["user"], prefix="/user")
+router = APIRouter(tags=["modelversion"], prefix="/modelversion")
 
 
 ####################################################################################################
@@ -14,7 +15,7 @@ router = APIRouter(tags=["user"], prefix="/user")
 ####################################################################################################
 
 
-async def upload_model_to_registry(
+async def upload_model_version_to_registry(
     file: UploadFile,
     artifact_path: str,
 ):
@@ -25,7 +26,7 @@ async def upload_model_to_registry(
     )
 
 
-async def log_new_model_to_db(
+async def log_new_model_version_to_db(
     namespace: str,
     model_name: str,
     model_version: str,
@@ -33,7 +34,7 @@ async def log_new_model_to_db(
     artifact_path: str,
     tags: List[str],
 ):
-    db_connector.log_new_model(
+    db_connector.log_new_model_version(
         namespace=namespace,
         model_name=model_name,
         model_version=model_version,
@@ -43,35 +44,26 @@ async def log_new_model_to_db(
     )
 
 
-async def get_model_id(
-    namespace: str,
-    model_name: str,
-    model_version: str,
+####################################################################################################
+# MODEL VERSION
+####################################################################################################
+
+
+@router.get("")
+async def get_model_version_info(
+    model_id: Annotated[str, Depends(get_model_id)], model_version: str
 ):
-    model_id = db_connector.get_model_id(
-        namespace=namespace,
-        model_name=model_name,
-        model_version=model_version,
-    )
-    return model_id
-
-
-####################################################################################################
-# API
-####################################################################################################
-
-
-@router.get("/model")
-async def get_model_info(model_id: Annotated[str, Depends(get_model_id)]):
     """
     **[DONE]**\n
     """
-    model = db_connector.get_model(model_id=model_id)
-    return model
+    modelversion = db_connector.get_model_version(
+        model_id=model_id, model_version=model_version
+    )
+    return modelversion
 
 
-@router.post("/model")
-async def log_new_model(
+@router.post("")
+async def log_new_model_version(
     file: UploadFile,
     namespace: str,
     model_name: str,
@@ -87,10 +79,10 @@ async def log_new_model(
     3. Log the model to the database
     4. Set uploader as the model owner
     """
-    # workaround
-    tags = tags[0].split(",")
-    if tags == [""]:
-        tags = []
+
+    # workaround for body with file and json
+    if tags:
+        tags = list(set(tags[0].split(",")))
 
     artifact_path = resolve_artifact_path(
         namespace=namespace,
@@ -98,12 +90,12 @@ async def log_new_model(
         model_version=model_version,
     )
 
-    await upload_model_to_registry(
+    await upload_model_version_to_registry(
         file=file,
         artifact_path=artifact_path,
     )
 
-    await log_new_model_to_db(
+    await log_new_model_version_to_db(
         namespace=namespace,
         model_name=model_name,
         model_version=model_version,
@@ -113,73 +105,48 @@ async def log_new_model(
     )
 
 
-@router.get("/model/download")
-async def download_model_pickle(
+@router.get("/all")
+async def get_all_model_version_info(model_id: Annotated[str, Depends(get_model_id)]):
+    """
+    **[DONE]**\n
+    """
+    modelversions = db_connector.get_all_model_versions(model_id=model_id)
+    return modelversions
+
+
+@router.get("/download")
+async def download_modelversion_pickle(
     background_tasks: BackgroundTasks,
-    namespace: str,
-    model_name: str,
+    model_id: Annotated[str, Depends(get_model_id)],
     model_version: str,
 ):
     """
     **[DONE]**\n
     """
-    artifact_path = resolve_artifact_path(
-        namespace=namespace,
-        model_name=model_name,
-        model_version=model_version,
+    model_version = db_connector.get_model_version(
+        model_id=model_id, model_version=model_version
     )
-    temp_file_path = registry_connector.download_model(artifact_path=artifact_path)
-    file_name = artifact_path.replace("/", "__")
+    temp_file_path = registry_connector.download_model(
+        artifact_path=model_version.artifact_path
+    )
+    file_name = model_version.artifact_path.replace("/", "__")
     headers = {"Content-Disposition": f'attachment; filename="{file_name}"'}
     background_tasks.add_task(remove_file, temp_file_path)
     return FileResponse(temp_file_path, headers=headers)
 
 
-@router.put("/model/tag")
-async def add_tag(model_id: Annotated[str, Depends(get_model_id)], tag: str):
-    """
-    **[DONE]**\n
-    """
-    db_connector.add_tag(model_id=model_id, tag=tag)
-    return "OK", 200
-
-
-@router.put("/model/untag")
-async def remove_tags(model_id: Annotated[str, Depends(get_model_id)], tag: str):
-    """
-    **[DONE]**\n
-    """
-    db_connector.remove_tag(model_id=model_id, tag=tag)
-    return "OK", 200
-
-
-@router.put("/model/status")
+@router.put("/status")
 async def update_model_status(
-    model_id: Annotated[str, Depends(get_model_id)], model_status: str
+    model_id: Annotated[str, Depends(get_model_id)],
+    model_version: str,
+    model_status: str,
 ):
     """
     **[DONE]**\n
     """
-    db_connector.update_model_status(model_id=model_id, model_status=model_status)
-    return "OK", 200
-
-
-@router.post("/models")
-async def list_models_info(
-    namespace: str = None,
-    model_name: str = None,
-    model_version: str = None,
-    model_status: str = None,
-    tags: List[str] = [],
-):
-    """
-    **[TODO]**\n
-    """
-    models = db_connector.filter_models(
-        namespace=namespace,
-        model_name=model_name,
+    db_connector.model_version_update_status(
+        model_id=model_id,
         model_version=model_version,
         model_status=model_status,
-        tags=tags,
     )
-    return models
+    return "OK", 200
