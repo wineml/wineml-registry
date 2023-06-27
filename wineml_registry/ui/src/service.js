@@ -38,7 +38,7 @@ const post = async ({ route, params = {}, body = {} } = {}) => {
     params: params,
     headers: {
       'Content-Type': 'application/json',
-      Authorization: token,
+      // Authorization: token,
     },
   };
   const res = await axios

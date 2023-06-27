@@ -1,13 +1,13 @@
 import Typography from '@mui/material/Typography';
 
 
-function Dashboard() {
+function Settings() {
 
     return (
         <Typography paragraph>
-            Dashboard
+            Settings
         </Typography>
     );
 }
 
-export default Dashboard;
+export default Settings;

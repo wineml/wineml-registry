@@ -1,265 +1,185 @@
-import PropTypes from 'prop-types';
-import { useState, useEffect, useMemo } from 'react';
-import Typography from '@mui/material/Typography';
-import serviceCaller from '../service';
-import { TableHead, TableRow, TableCell, TableSortLabel, Box, Table, TableBody, Toolbar, Paper, TableContainer, TablePagination } from '@mui/material';
-import { visuallyHidden } from '@mui/utils';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Select, MenuItem } from '@mui/material';
+import serviceCaller from '../service'
+import {
+  Box,
+  Group,
+  Stack,
+  Select,
+  Card,
+  Text,
+  Input,
+  Badge,
+  createStyles,
+  Skeleton,
+} from '@mantine/core';
+import { useInputState } from '@mantine/hooks';
+import { IconFilterX } from '@tabler/icons-react';
 
+const useStyles = createStyles((theme) => ({
+  card: {
+    backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+  },
+
+  label: {
+    textTransform: 'uppercase',
+    fontSize: theme.fontSizes.xs,
+    fontWeight: 700,
+  },
+}));
+
+function generateLightColor(text, lightness = 80) {
+  const hash = Array.from(text).reduce((hash, char) => ((hash << 5) - hash) + char.charCodeAt(0), 0);
+  const hue = hash % 360;
+  const saturation = 100;
+  const color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+  return color;
+}
 
 function Models() {
-    const [rows, setRows] = useState([]);
-    const [namespaces, setNamespaces] = useState([]);
+  const { classes, theme } = useStyles();
+  const navigate = useNavigate();
+  const [allModelCards, setAllModelCards] = useState([]);
+  const [namespaces, setNamespaces] = useState([""]);
+  const [selectedNamespace, setSelectedNamespace] = useState(null);
+  const [modelsInNamespace, setModelsInNamespace] = useState([{}]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [filterString, setFilterString] = useInputState('');
 
-
-    useEffect(() => {
-        serviceCaller.get({ route: '/db/models' })
-            .then((res) => {
-                setRows(res.data);
-                setNamespaces(Array.from(new Set(res.data.map((row) => row.namespace))));
-                }
-            )
-    }, []);
-
-    const headCells = [
-        {
-          id: 'namespace',
-          numeric: false,
-          disablePadding: true,
-          label: 'Namespace',
-        },
-        {
-          id: 'model_name',
-          numeric: true,
-          disablePadding: false,
-          label: 'Model Name',
-        },
-        {
-          id: 'version',
-          numeric: true,
-          disablePadding: false,
-          label: 'Version',
-        },
-        {
-          id: 'state',
-          numeric: true,
-          disablePadding: false,
-          label: 'state',
-        },
-        {
-          id: 'tags',
-          numeric: true,
-          disablePadding: false,
-          label: 'Tags',
-        },
-        {
-          id: 'last_updated',
-          numeric: true,
-          disablePadding: false,
-          label: 'Last Updated',
-        },
-      ];
-
-
-    function descendingComparator(a, b, orderBy) {
-        if (b[orderBy] < a[orderBy]) {
-          return -1;
+  useEffect(() => {
+    serviceCaller.get({ route: '/model/all' })
+        .then((res) => {
+          let uniqueNamespaces = [...new Set(res.data.map((modelCard) => modelCard.namespace))];
+          setAllModelCards(res.data);
+          setNamespaces(uniqueNamespaces);
+          setSelectedNamespace(uniqueNamespaces[0]);
+          setIsLoading(false);
         }
-        if (b[orderBy] > a[orderBy]) {
-          return 1;
-        }
-        return 0;
-    }
+      )
+  }, []);
 
-    function getComparator(order, orderBy) {
-        return order === 'desc'
-          ? (a, b) => descendingComparator(a, b, orderBy)
-          : (a, b) => -descendingComparator(a, b, orderBy);
-    }
+  useEffect(() => {
+    setModelsInNamespace(allModelCards.filter((modelCard) => (
+      modelCard.namespace === selectedNamespace) && (modelCard.model_name.toLowerCase().includes(filterString)
+      )));
+  }, [selectedNamespace, allModelCards, filterString]);
 
-    function EnhancedTableHead(props) {
-        const { order, orderBy, onRequestSort } = props;
-        const createSortHandler = (property) => (event) => {
-            onRequestSort(event, property);
-        };
+  function handleModelClick(modelCard) {
+    navigate(`/model/${modelCard.id}`)
+  }
 
-        return (
-          <TableHead>
-            <TableRow>
-              {headCells.map((headCell) => (
-                <TableCell
-                  key={headCell.id}
-                  align={headCell.numeric ? 'right' : 'left'}
-                  sortDirection={orderBy === headCell.id ? order : false}
-                >
-                  <TableSortLabel
-                    active={orderBy === headCell.id}
-                    direction={orderBy === headCell.id ? order : 'asc'}
-                    onClick={createSortHandler(headCell.id)}
-                  >
-                    {headCell.label}
-                    {orderBy === headCell.id ? (
-                      <Box component="span" sx={visuallyHidden}>
-                        {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                      </Box>
-                    ) : null}
-                  </TableSortLabel>
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-        );
-      }
+  function handleTagClick(event, tag) {
+    event.stopPropagation();
+    console.log(tag);
+  }
 
-    EnhancedTableHead.propTypes = {
-        onRequestSort: PropTypes.func.isRequired,
-        order: PropTypes.oneOf(['asc', 'desc']).isRequired,
-        orderBy: PropTypes.string.isRequired,
-        rowCount: PropTypes.number.isRequired,
-    };
-
-    function EnhancedTableToolbar(props) {
-
-        return (
-        <Toolbar
+  return (
+    <Box>
+      <Group>
+      {
+        isLoading ? <Skeleton height={40} width={160} /> :
+          <Select
+            label="Namespace"
+            value={selectedNamespace}
+            onChange={setSelectedNamespace}
+            data={namespaces}
+            styles={() => ({
+              item: {
+                '&[data-selected]': {
+                  '&, &:hover': {
+                    backgroundColor: "#63032e",
+                    color: "white",
+                  },
+                },
+              },
+              input: {
+                '&:focus-within': {
+                  borderColor: "#63032e",
+                },
+              },
+            })}
             sx={{
-              pl: { sm: 2 },
-              pr: { xs: 1, sm: 1 },
+              width: 160,
+              mb: 3,
+              marginTop: -10,
             }}
-        >
-            <Typography
-                variant="h6"
-                id="tableTitle"
-                component="div"
-            >
-                Namespace:
-            </Typography>
-            <Select
-                variant='standard'
-                id="namespace-select-filter-standard"
-                value={namespaces}
-                label="namespace"
-                defaultValue={namespaces[0]}
-                // onChange={handleChange}
-            >
-                {namespaces.map((namespace, index) => (
-                    <MenuItem key={index} value={namespace}>{namespace}</MenuItem>
-                ))}
-            </Select>
-        </Toolbar>
-        );
-    }
-
-
-    function EnhancedTable() {
-        const navigate = useNavigate();
-        const [order, setOrder] = useState('asc');
-        const [orderBy, setOrderBy] = useState('calories');
-        const [page, setPage] = useState(0);
-        const [rowsPerPage, setRowsPerPage] = useState(25);
-
-        function handleRequestSort(property) {
-            const isAsc = orderBy === property && order === 'asc';
-            setOrder(isAsc ? 'desc' : 'asc');
-            setOrderBy(property);
-        };
-
-        function handleSelectModel(model_id) {
-            navigate(`/model/${model_id}`)
-        };
-
-        function handleChangePage(event, newPage) {
-            setPage(newPage);
-        };
-
-        function handleChangeRowsPerPage(event) {
-            setRowsPerPage(parseInt(event.target.value, 10));
-            setPage(0);
-        };
-
-
-        // Avoid a layout jump when reaching the last page with empty rows.
-        const emptyRows =
-          page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-
-        const visibleRows = useMemo(
-          () =>
-            rows.slice().sort(getComparator(order, orderBy)).slice(
-              page * rowsPerPage,
-              page * rowsPerPage + rowsPerPage,
-            ),
-          [order, orderBy, page, rowsPerPage],
-        );
-
-
-        return (
-        <Box sx={{ width: '100%' }}>
-            <Paper sx={{ width: '100%', mb: 2 }}>
-                <EnhancedTableToolbar />
-                <TableContainer>
-                <Table
-                    sx={{ minWidth: 750 }}
-                    aria-labelledby="tableTitle"
-                >
-                <EnhancedTableHead
-                    order={order}
-                    orderBy={orderBy}
-                    onRequestSort={handleRequestSort}
-                    rowCount={rows.length}
-                />
-                <TableBody>
-                    {visibleRows.map((row, index) => {
-                    const labelId = `enhanced-table-checkbox-${index}`;
-
-                    return (
-                        <TableRow
-                            hover
-                            onClick={() => handleSelectModel(row.id)}
-                            role="checkbox"
-                            tabIndex={-1}
-                            key={row.id}
-                            sx={{ cursor: 'pointer' }}
-                        >
-                            <TableCell
-                                component="th"
-                                id={labelId}
-                                scope="row"
-                            >
-                                {row.namespace}
-                            </TableCell>
-                            <TableCell align="right">{row.model_name}</TableCell>
-                            <TableCell align="right">{row.model_version}</TableCell>
-                            <TableCell align="right">{row.model_status}</TableCell>
-                            <TableCell align="right">{row.tags}</TableCell>
-                            <TableCell align="right">{row.last_updated}</TableCell>
-                        </TableRow>
-                    );
-                    })}
-                    {emptyRows > 0 && (
-                        <TableRow>
-                            <TableCell colSpan={6} />
-                        </TableRow>
-                    )}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            <TablePagination
-                rowsPerPageOptions={[25, 50, 100]}
-                component="div"
-                count={rows.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-            />
-            </Paper>
-        </Box>
-        );
-    }
-    return (
-        <EnhancedTable />
-    );
+        />
+      }
+      {
+        isLoading ? <Skeleton height={40} width={160} /> :
+        <Input
+          icon={<IconFilterX size="1.125rem" />}
+          placeholder="Filter"
+          value={filterString}
+          onChange={setFilterString}
+          styles={() => ({
+            input: {
+              '&:focus-within': {
+                borderColor: "#63032e",
+              },
+            },
+          })}
+          sx={{
+            marginTop: 15,
+            flexGrow: 1,
+          }}
+        />
+      }
+      </Group>
+      <Stack pt={20} spacing={10}>
+      {
+        isLoading ?
+        Array.from({ length: 20 }).map((_, index) => (
+          <Skeleton key={index} height={55} width="100%"/>
+        )) :
+        modelsInNamespace.map((modelCard, i) => (
+        <Card p={15} withBorder shadow='sm' key={`model-${i}`} radius="sm" className={classes.card}>
+          <Card.Section
+            sx={{
+              '&:hover': {
+                cursor: 'pointer',
+                backgroundColor: theme.fn.lighten("#63032e", 0.95),
+              },
+            }}
+            onClick={() => handleModelClick(modelCard)}
+          >
+            <Group position="apart">
+              <Text p={15} fw={500}>
+                {modelCard.model_name}
+              </Text>
+              <Group spacing={7} pr={15}>
+              {
+                modelCard.tags?.map((tag, i) => {
+                  let tagColor = generateLightColor(tag);
+                  let tagHoverColor = "#63032e"
+                  return (
+                    <Badge
+                      sx={{
+                        backgroundColor: tagColor,
+                        color: 'black',
+                        '&:hover': {
+                          background: tagHoverColor,
+                          color: 'white'
+                        },
+                      }}
+                      key={`${modelCard.model_name}-tag-${i}`}
+                      label={tag}
+                      onClick={(event) => {handleTagClick(event, tag)}}
+                    >
+                      {tag}
+                    </Badge>
+                  )
+                })
+              }
+              </Group>
+              </Group>
+            </Card.Section>
+          </Card>
+        ))
+      }
+      </Stack>
+    </Box>
+  );
 }
 
 export default Models;

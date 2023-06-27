@@ -1,10 +1,11 @@
 import { Routes, Route } from 'react-router-dom';
 import Box from '@mui/material/Box';
-import SideBar from '../components/sidebar';
-import Dashboard from '../pages/dashboard';
+import SideBar from '../components/sidebar.tsx';
 import Models from '../pages/models';
 import Model from '../pages/model';
 import Account from '../pages/account';
+import ModelVersion from '../pages/modelversion';
+import Settings from '../pages/settings';
 
 function Home() {
 
@@ -16,10 +17,11 @@ function Home() {
                 sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3 }}
             >
                 <Routes>
-                    <Route path="/" element={<Dashboard/>} />
+                    <Route path="/" element={<Models/>} />
+                    <Route path="/model/:modelID" element={<Model/>} />
+                    <Route path="/model/:modelID/:modelVersion" element={<ModelVersion/>} />
                     <Route path="/account" element={<Account/>} />
-                    <Route path="/models" element={<Models/>} />
-                    <Route path="/model" element={<Model/>} />
+                    <Route path="/settings" element={<Settings/>} />
                 </Routes>
             </Box>
         </Box>
