@@ -28,7 +28,7 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-function generateLightColor(text, lightness = 80) {
+export function generateLightColor(text, lightness = 80) {
   const hash = Array.from(text).reduce((hash, char) => ((hash << 5) - hash) + char.charCodeAt(0), 0);
   const hue = hash % 360;
   const saturation = 100;
