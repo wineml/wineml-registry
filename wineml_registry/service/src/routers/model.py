@@ -61,3 +61,12 @@ async def remove_tags(model_id: Annotated[str, Depends(get_model_id)], tag: str)
     """
     db_connector.model_remove_tag(model_id=model_id, tag=tag)
     return "OK", 200
+
+
+@router.get("/{model_id}")
+async def get_model_info_by_id(model_id: str):
+    """
+    **[DONE]**\n
+    """
+    model = db_connector.get_model(model_id=model_id)
+    return model
