@@ -1,6 +1,10 @@
 import os
 
 from constants import LOCAL_DB_PATH
+from db.local import LocalModelConnector
+from db.mysql import MysqlModelConnector
+from db.postgres import PostgresModelConnector
+from logger import logger
 
 
 def db_resolver():
@@ -18,6 +22,16 @@ def db_resolver():
         ]
     ):
         return "postgres"
+    elif all(
+        [
+            os.getenv("MYSQL_USER"),
+            os.getenv("MYSQL_PASSWORD"),
+            os.getenv("MYSQL_HOST"),
+            os.getenv("MYSQL_PORT"),
+            os.getenv("MYSQL_DATABASE"),
+        ]
+    ):
+        return "mysql"
     else:
         return "local"
 
@@ -28,10 +42,9 @@ def initiate_db():
     """
 
     db_connector = db_resolver()
+    logger.info(f"Connected to Database: {db_connector}")
 
     if db_connector == "postgres":
-        from db.postgres import PostgresModelConnector
-
         return PostgresModelConnector(
             username=os.environ["POSTGRES_USER"],
             password=os.environ["POSTGRES_PASSWORD"],
@@ -40,10 +53,14 @@ def initiate_db():
             database=os.environ["POSTGRES_DB"],
         )
     elif db_connector == "mysql":
-        ...
+        return MysqlModelConnector(
+            username=os.environ["MYSQL_USER"],
+            password=os.environ["MYSQL_PASSWORD"],
+            host=os.environ["MYSQL_HOST"],
+            port=os.environ["MYSQL_PORT"],
+            database=os.environ["MYSQL_DATABASE"],
+        )
     elif db_connector == "local":
-        from db.local import LocalModelConnector
-
         return LocalModelConnector(os.getenv("LOCAL_DB_PATH", LOCAL_DB_PATH))
     else:
         raise ValueError("Invalid db_connector")
