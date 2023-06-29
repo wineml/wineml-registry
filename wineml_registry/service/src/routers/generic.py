@@ -1,7 +1,7 @@
 from constants import VERSION
 from fastapi import APIRouter
 
-router = APIRouter(tags=["public"])
+router = APIRouter()
 
 ####################################################################################################
 # Generic APIs
@@ -15,4 +15,4 @@ async def get_health():
 
 @router.get("/version")
 async def get_version():
-    return VERSION, 200
+    return VERSION

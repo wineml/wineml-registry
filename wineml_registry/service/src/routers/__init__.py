@@ -1,13 +1,9 @@
-from .public.generic import router as public_generic
-from .user.db import router as user_db
-from .user.registry import router as user_registry
+from routers.generic import router as public_generic
+from routers.model import router as model_route
+from routers.modelversion import router as modelversion_route
 
 all_routers = [
-    # admin routers
-    # approvers routers
-    # user routers
-    user_registry,
-    user_db,
-    # public routers
     public_generic,
+    model_route,
+    modelversion_route,
 ]
