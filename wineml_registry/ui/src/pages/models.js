@@ -55,7 +55,10 @@ function Models() {
           setSelectedNamespace(uniqueNamespaces[0]);
           setIsLoading(false);
         }
-      )
+      ).catch((err) => {
+        setIsLoading(false);
+        }
+      );
   }, []);
 
   useEffect(() => {
