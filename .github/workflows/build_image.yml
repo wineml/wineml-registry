@@ -30,3 +30,9 @@ jobs:
           export image_url=ghcr.io/wineml/wineml-service-azure:latest
           docker build -f ./docker/azure/Dockerfile . --tag $image_url
           # docker push $image_url
+
+      - name: 'Build and Push AWS Image'
+        run: |
+          export image_url=ghcr.io/wineml/wineml-service-aws:latest
+          docker build -f ./docker/aws/Dockerfile . --tag $image_url
+          # docker push $image_url
