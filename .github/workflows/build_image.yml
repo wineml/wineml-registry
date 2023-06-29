@@ -1,0 +1,33 @@
+name: Build and Push Images to GHCR
+
+env:
+  DOTNET_VERSION: '6.0.x'
+
+on:
+  push:
+    # branches:
+    #   - main
+  workflow_dispatch:
+
+jobs:
+  build-push-image:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: './wineml_registry/service/docker'
+    steps:
+      - name: 'Checkout GitHub Action'
+        uses: actions/checkout@main
+
+      - name: 'Login to GitHub Container Registry'
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
+
+      - name: 'Build and Push Azure Image'
+        run: |
+          export image_url=ghcr.io/wineml/wineml-service-azure:latest
+          docker build ./azure --tag $image_url
+          # docker push $image_url
