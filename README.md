@@ -5,7 +5,7 @@ WineML Registry is a model management tool that helps your data science team to 
 - Custom Versioning Semantic
 - Custom Model Status
 - Models tagging
-- Namespace Isolcation
+- Namespace Isolation
 
 # How it works?
 WineML uses a backend store and database to store all the information about your models.
