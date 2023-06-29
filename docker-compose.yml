@@ -16,19 +16,6 @@ services:
       - AZURE_CONTAINER_NAME="YOUR_CONTAINER_NAME"
       - AZURE_STORAGE_CONNECTION_STRING="YOUR_CONNECTION_STRING"
 
-  init_db:
-    container_name: wineml_registry_init_db
-    image: curlimages/curl
-    command:
-      - /bin/sh
-      - -c
-      - 'curl -X PUT "http://wineml_registry_service:8081/db/init"'
-    depends_on:
-      - wineml_registry_service
-    restart: on-failure
-    networks:
-      - wineml-network
-
   wineml_registry_ui:
     container_name: wineml_registry_ui_container
     build:
