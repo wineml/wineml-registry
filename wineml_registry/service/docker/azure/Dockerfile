@@ -4,7 +4,7 @@ ENV PYTHONPATH="/usr/src:$PATH"
 
 WORKDIR /usr
 
-COPY requirements/requirements.azure.txt requirements.txt
+COPY docker/azure/requirements.txt requirements.txt
 
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
