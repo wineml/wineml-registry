@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   # ONLY NEEDED IF YOU CHOOSE TO HOST YOUR OWN DATABASE
-  postgres_db:
+  db:
     container_name: postgres_db_container
     image: postgres:15.3
     networks:
@@ -12,17 +12,32 @@ services:
       - POSTGRES_PASSWORD=postgres
     volumes:
       - postgres_db_data:/var/lib/postgresql/data
+  db:
+    container_name: mysql_db_container
+    image: mysql:8.0.33
+    networks:
+      - wineml-network
+    environment:
+      - MYSQL_DATABASE=wineml
+      - MYSQL_ROOT_PASSWORD=root-password
+    volumes:
+      - mysql_db_data:/var/lib/mysql
 
   wineml_registry_service:
     container_name: wineml_registry_service_container
     build:
       context: ./wineml_registry/service
-      dockerfile: ./docker/Dockerfile.azure
+      # GCP
+      dockerfile: ./docker/gcp/Dockerfile
+      # AWS
+      dockerfile: ./docker/aws/Dockerfile
+      # AZURE
+      dockerfile: ./docker/azure/Dockerfile
     image: wineml_registry_service_image
     networks:
       - wineml-network
     depends_on:
-      - postgres_db
+      - db
     environment:
     ############################################################################
     # BACKEND STORE CONFIGURATION
@@ -48,11 +63,23 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       # CONNECT INTERNAL POSTGRES IN DOCKER-COMPOSE
-      - POSTGRES_HOST=postgres_db
+      - POSTGRES_HOST=db
       - POSTGRES_PORT=5432
       - POSTGRES_DB=wineml
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+      # CONNECT EXTERNAL MYSQL
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_PORT=${MYSQL_PORT}
+      - MYSQL_DATABASE=wineml
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      # CONNECT INTERNAL MYSQL IN DOCKER-COMPOSE
+      - MYSQL_HOST=db
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=wineml
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root-password
 
 
   wineml_registry_ui:
