@@ -8,7 +8,9 @@ def registry_connector_resolver():
 
     if os.environ.get("AWS_ACCESS_KEY_ID"):
         return "aws"
-    elif os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
+    elif os.environ.get("GOOGLE_APPLICATION_CREDENTIALS") and (
+        os.environ.get("GCP_GCS_BUCKET_NAME")
+    ):
         return "gcp"
     elif os.environ.get("AZURE_STORAGE_CONNECTION_STRING") and (
         os.environ.get("AZURE_STORAGE_CONTAINER_NAME")
@@ -29,11 +31,10 @@ def initiate_registry():
         from registry.aws import AWSRegistryController
 
         return AWSRegistryController(bucket_name=os.environ.get("AWS_S3_BUCKET_NAME"))
-    # elif registry_type == 'gcp':
-    #     from registry.gcp import GCPRegistryController
-    #     return GCPRegistryController(
-    #         credentials=os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'),
-    #         bucket_name=os.environ.get('BUCKET_NAME'))
+    elif registry_connector == "gcp":
+        from registry.gcp import GCPRegistryController
+
+        return GCPRegistryController(bucket_name=os.environ.get("GCP_GCS_BUCKET_NAME"))
     elif registry_connector == "azure":
         from registry.azure import AzureRegistryController
 

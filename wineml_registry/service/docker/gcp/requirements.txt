@@ -1,0 +1,6 @@
+fastapi==0.96.0
+uvicorn[standard]==0.22.0
+python-multipart==0.0.6
+sqlmodel==0.0.8
+psycopg2-binary==2.9.6
+google-cloud-storage==2.10.0
