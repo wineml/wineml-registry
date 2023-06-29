@@ -1,5 +1,18 @@
 version: '3.8'
 services:
+  # ONLY NEEDED IF YOU CHOOSE TO HOST YOUR OWN DATABASE
+  postgres_db:
+    container_name: postgres_db_container
+    image: postgres:15.3
+    networks:
+      - wineml-network
+    environment:
+      - POSTGRES_DB=wineml
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres_db_data:/var/lib/postgresql/data
+
   wineml_registry_service:
     container_name: wineml_registry_service_container
     build:
@@ -8,9 +21,12 @@ services:
     image: wineml_registry_service_image
     networks:
       - wineml-network
-    # ports:
-    #   - 8081:8081
+    depends_on:
+      - postgres_db
     environment:
+    ############################################################################
+    # BACKEND STORE CONFIGURATION
+    ############################################################################
       # GCP GCS EXAMPLE
       - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
       - GCP_GCS_BUCKET_NAME=${GCP_GCS_BUCKET_NAME}
@@ -22,6 +38,22 @@ services:
       - AZURE_ACCOUNT_NAME=${AZURE_ACCOUNT_NAME}
       - AZURE_CONTAINER_NAME=${AZURE_CONTAINER_NAME}
       - AZURE_STORAGE_CONNECTION_STRING=${AZURE_STORAGE_CONNECTION_STRING}
+    ############################################################################
+    # DATABASE CONFIGURATION
+    ############################################################################
+      # CONNECT EXTERNAL POSTGRES
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=wineml
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      # CONNECT INTERNAL POSTGRES IN DOCKER-COMPOSE
+      - POSTGRES_HOST=postgres_db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=wineml
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+
 
   wineml_registry_ui:
     container_name: wineml_registry_ui_container
