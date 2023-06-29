@@ -8,7 +8,6 @@ import Login from '../pages/login';
 function AppRoutes() {
   const { isLoggedIn } = useContext(AuthContext);
 
-
   return (
     <BrowserRouter>
       <Routes>

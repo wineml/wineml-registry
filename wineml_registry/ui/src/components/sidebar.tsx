@@ -1,13 +1,16 @@
 import React from 'react';
-import { useContext, useState } from 'react';
-import { AuthContext } from '../authContext';
+import {
+  // useContext,
+  useState,
+} from 'react';
+// import { AuthContext } from '../authContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { createStyles, Navbar, Group, Code, getStylesRef, rem, Text } from '@mantine/core';
 import {
-  IconFingerprint,
+  // IconFingerprint,
   IconGlassFull,
-  IconSettings,
-  IconLogout,
+  // IconSettings,
+  // IconLogout,
 } from '@tabler/icons-react';
 
 
@@ -49,6 +52,19 @@ const useStyles = createStyles((theme) => ({
     },
   },
 
+  logout: {
+    ...theme.fn.focusStyles(),
+    display: 'flex',
+    alignItems: 'center',
+    textDecoration: 'none',
+    fontSize: theme.fontSizes.sm,
+    color: theme.white,
+    padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
+    borderRadius: theme.radius.sm,
+    fontWeight: 500,
+    backgroundColor: "#A40000",
+  },
+
   linkIcon: {
     ref: getStylesRef('icon'),
     color: theme.white,
@@ -66,8 +82,7 @@ const useStyles = createStyles((theme) => ({
 
 const navbarItems = [
   { link: '/home', label: 'Models', icon: IconGlassFull },
-  { link: '/account', label: 'Account', icon: IconFingerprint },
-  { link: '/settings', label: 'Settings', icon: IconSettings },
+  // { link: '/settings', label: 'Settings', icon: IconSettings },
 ];
 
 export function SideBar() {
@@ -75,7 +90,7 @@ export function SideBar() {
   const location = useLocation();
   const { classes, cx } = useStyles();
   const [ active, setActive ] = useState(location.pathname);
-  const { logout } = useContext(AuthContext);
+  // const { logout } = useContext(AuthContext);
 
   function handleSidebarClick(event, route) {
     event.preventDefault();
@@ -83,11 +98,10 @@ export function SideBar() {
     navigate(route);
   }
 
-  function handleLogout() {
-    console.log('logout');
-    logout();
-    window.location.reload();
-  }
+  // function handleLogout() {
+  //   logout();
+  //   window.location.reload();
+  // }
 
   const links = navbarItems.map((item) => (
     <a
@@ -113,12 +127,19 @@ export function SideBar() {
         {links}
       </Navbar.Section>
 
-      <Navbar.Section className={classes.footer}>
-        <a href="/" className={classes.link} onClick={handleLogout}>
+      {/* <Navbar.Section className={classes.footer}>
+        <a href="/account" className={classes.link} onClick={(event) => {
+            handleSidebarClick(event, "/account");
+          }}
+        >
+          <IconFingerprint className={classes.linkIcon} stroke={1.5} />
+          <span>Account</span>
+        </a>
+        <a href="/" className={classes.logout} onClick={handleLogout}>
           <IconLogout className={classes.linkIcon} stroke={1.5} />
           <span>Logout</span>
         </a>
-      </Navbar.Section>
+      </Navbar.Section> */}
     </Navbar>
   );
 }

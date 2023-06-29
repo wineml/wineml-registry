@@ -85,7 +85,7 @@ function Model() {
     const [modelInfo, setModelInfo] = useState({});
     const [modelVersions, setModelVersions] = useState([]);
     const [sortedData, setSortedData] = useState([]);
-    const [sortBy, setSortBy] = useState(null);
+    const [sortBy, setSortBy] = useState('last_updated');
     const [reverseSortDirection, setReverseSortDirection] = useState(false);
     let modelID = params.modelID;
 
@@ -182,7 +182,7 @@ function Model() {
                 </Group>
             </Stack>
             <ScrollArea>
-            <Table verticalSpacing="sm" mt={20}>
+            <Table verticalSpacing={5} mt={20}>
                 <thead>
                 <tr>
                     <Th

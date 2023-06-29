@@ -1,12 +1,9 @@
-import Typography from '@mui/material/Typography';
-
-
 function Account() {
 
     return (
-        <Typography paragraph>
+        <div paragraph>
             Account
-        </Typography>
+        </div>
     );
 }
 

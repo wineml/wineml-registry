@@ -1,12 +1,9 @@
-import Typography from '@mui/material/Typography';
-
-
 function Settings() {
 
     return (
-        <Typography paragraph>
+        <div paragraph>
             Settings
-        </Typography>
+        </div>
     );
 }
 

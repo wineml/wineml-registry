@@ -1,10 +1,10 @@
-import { useParams } from 'react-router-dom';
+// import { useParams } from 'react-router-dom';
 
 
 function ModelVersion() {
-    const params = useParams();
-    let modelID = params.modelID;
-    let modelVersion = params.modelVersion;
+    // const params = useParams();
+    // let modelID = params.modelID;
+    // let modelVersion = params.modelVersion;
 
 
     return (

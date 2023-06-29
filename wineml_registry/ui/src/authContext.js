@@ -4,7 +4,7 @@ import React, { createContext, useState, useEffect } from 'react';
 const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
-  const [isLoggedIn, setLoggedIn] = useState(false);
+  const [isLoggedIn, setLoggedIn] = useState(true); //TO REMOVE WHEN AUTH IS DONE
   const [user, setUser] = useState(null);
 
   useEffect(() => {
