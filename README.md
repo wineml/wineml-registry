@@ -16,12 +16,11 @@ WineML uses a backend store and database to store all the information about your
 - [Azure Blob Storage](https://azure.microsoft.com/en-us/products/storage/blobs)
 
 ## Supported database
+- [MySQL](https://www.mysql.com/)
+- [PostgreSQL](https://www.postgresql.org/)
 - [sqlite](https://www.sqlite.org/index.html)
 
 # Features and enhancements in roadmap
 - Python client library to submit models in arbitrary model development pipeline
 - RBAC
 - Custom Metrics loggings for models
-
-# More database support
-- [PostgreSQL](https://www.postgresql.org/)
