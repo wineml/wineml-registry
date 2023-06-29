@@ -4,9 +4,8 @@ env:
   DOTNET_VERSION: '6.0.x'
 
 on:
-  push:
-    # branches:
-    #   - main
+  pull_request:
+    types: [opened, reopened, synchronize]
   workflow_dispatch:
 
 jobs:
