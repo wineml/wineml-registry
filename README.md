@@ -12,6 +12,7 @@ WineML uses a backend store and database to store all the information about your
 
 ## Supported backend store
 - [AWS S3](https://aws.amazon.com/s3/)
+- [Google GCS](https://cloud.google.com/storage)
 - [Azure Blob Storage](https://azure.microsoft.com/en-us/products/storage/blobs)
 
 ## Supported database
@@ -21,9 +22,6 @@ WineML uses a backend store and database to store all the information about your
 - Python client library to submit models in arbitrary model development pipeline
 - RBAC
 - Custom Metrics loggings for models
-
-## More backend store support
-- [Google GCS](https://cloud.google.com/storage)
 
 # More database support
 - [PostgreSQL](https://www.postgresql.org/)
