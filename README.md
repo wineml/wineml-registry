@@ -15,6 +15,7 @@ WineML uses a backend store and database to store all the information about your
 
 ## Supported database
 - [sqlite](https://www.sqlite.org/index.html)
+- [AWS S3](https://aws.amazon.com/s3/)
 
 # Features and enhancements in roadmap
 - Python client library to submit models in arbitrary model development pipeline
@@ -22,7 +23,6 @@ WineML uses a backend store and database to store all the information about your
 - Custom Metrics loggings for models
 
 ## More backend store support
-- [AWS S3](https://aws.amazon.com/s3/)
 - [Google GCS](https://cloud.google.com/storage)
 
 # More database support
