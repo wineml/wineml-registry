@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import all_routers
 
+# main app
 app = FastAPI(
     title="WineML Registry Service",
     version=VERSION,
