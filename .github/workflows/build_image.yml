@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: './wineml_registry/service/docker'
+        working-directory: './wineml_registry/service/'
     steps:
       - name: 'Checkout GitHub Action'
         uses: actions/checkout@main
@@ -29,5 +29,5 @@ jobs:
       - name: 'Build and Push Azure Image'
         run: |
           export image_url=ghcr.io/wineml/wineml-service-azure:latest
-          docker build ./azure --tag $image_url
+          docker build -f ./docker/azure/Dockerfile . --tag $image_url
           # docker push $image_url
