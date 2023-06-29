@@ -11,10 +11,10 @@ WineML Registry is a model management tool that helps your data science team to 
 WineML uses a backend store and database to store all the information about your models.
 
 ## Supported backend store
-- (Azure Blob Storage)[https://azure.microsoft.com/en-us/products/storage/blobs]
+- [Azure Blob Storage](https://azure.microsoft.com/en-us/products/storage/blobs)
 
 ## Supported database
-- (sqlite)[https://www.sqlite.org/index.html]
+- [sqlite](https://www.sqlite.org/index.html)
 
 # Features and enhancements in roadmap
 - Python client library to submit models in arbitrary model development pipeline
@@ -22,8 +22,8 @@ WineML uses a backend store and database to store all the information about your
 - Custom Metrics loggings for models
 
 ## More backend store support
-- (AWS S3)[https://aws.amazon.com/s3/]
-- (Google GCS)[https://cloud.google.com/storage]
+- [AWS S3](https://aws.amazon.com/s3/)
+- [Google GCS](https://cloud.google.com/storage)
 
 # More database support
-- (PostgreSQL)[https://www.postgresql.org/]
+- [PostgreSQL](https://www.postgresql.org/)
